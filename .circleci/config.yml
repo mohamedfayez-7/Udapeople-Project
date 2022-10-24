@@ -143,6 +143,27 @@ jobs:
       # This command has a when: on_fail
       - destroy-environment
 
+  configure-infrastructure:
+    docker:
+      - image: python:3.9.1-alpine3.12
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "cf:78:4c:aa:3d:97:61:8e:86:e7:e4:8b:09:6b:ed:1f"
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update ansible aws-cli
+      - run:
+          name: Configure server
+          command: |
+            cd .circleci/ansible
+            ansible-playbook -i inventory.txt configure-server.yml
+      - destroy-environment
+
 workflows:
   default:
     jobs:
