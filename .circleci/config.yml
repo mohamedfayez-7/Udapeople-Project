@@ -200,6 +200,7 @@ jobs:
             npm install
             npm audit fix --audit-level=critical --force
             npm audit fix --audit-level=critical --force
+            npm audit fix --audit-level=critical --force
             npm audit --audit-level=critical
             npm run migrations > migrations_dump.txt
       - run:
