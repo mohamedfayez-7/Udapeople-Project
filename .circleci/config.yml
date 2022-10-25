@@ -12,9 +12,28 @@ commands:
           name: Destroy environments
           when: on_fail
           command: |
-            aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.Workflow_ID >>
             aws s3 rm s3://udapeople-<<parameters.Workflow_ID>> --recursive
+            aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.Workflow_ID >>
             aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.Workflow_ID >>
+
+  rollback-on-failure-migration:
+    description: rollback to last migration
+    parameters:
+      Workflow_ID:
+        type: string
+        default: ${CIRCLE_WORKFLOW_ID:0:7}
+    steps:
+      - run:
+          name: rollback-on-failure
+          when: on_fail
+          command: |
+            SUCCESS=$(curl --insecure  https://kvdb.io/qMCu5x6y6RvS7ER4LGsr7/migration_<< parameters.Workflow_ID >>)
+            if (( $SUCCESS == 1 ));
+            then
+              cd ~/project/backend
+              npm install
+              npm run migration:revert
+            fi
 
 jobs:
   build-frontend:
@@ -140,7 +159,6 @@ jobs:
           root: .circleci/ansible
           paths:
             - inventory.txt
-      # This command has a when: on_fail
       - destroy-environment
 
   configure-infrastructure:
@@ -164,6 +182,96 @@ jobs:
             ansible-playbook -i inventory.txt configure-server.yml
       - destroy-environment
 
+  run-migrations:
+    docker:
+      - image: cimg/node:13.8.0
+    steps:
+      - checkout
+      - install_awscli
+      - run:
+          name: Run migrations
+          command: |
+            cd backend
+            npm install
+            npm run migrations > migrations_dump.txt
+      - run:
+          name: Send migration status to kvdb.io
+          command: |
+            if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
+            then
+              curl https://kvdb.io/qMCu5x6y6RvS7ER4LGsr7/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+            fi
+      - rollback-on-failure-migration
+      - destroy-environment
+     # Here's where you will add some code to rollback on failure      
+
+  deploy-frontend:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      # Checkout code from git
+      - checkout
+      - restore_cache:
+          keys: [frontend-build]
+      - run:
+          name: Install dependencies
+          command: |
+            yum install -y curl tar sudo
+            curl -sL https://rpm.nodesource.com/setup_13.x | sudo bash -
+            yum install -y nodejs
+      - run:
+          name: Get backend url
+          command: |
+            BACKEND_PUBLIC_IP_ADDRESS=$(aws ec2 describe-instances \
+              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --output text)
+            echo "API_URL=http://${BACKEND_PUBLIC_IP_ADDRESS}:3030" >> frontend/.env
+      - run:
+          name: Deploy frontend objects
+          command: |
+            cd frontend
+            npm run build
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+      - rollback-on-failure-migration
+      - destroy-environment
+      # Here's where you will add some code to rollback on failure      
+                    
+  deploy-backend:
+    docker:
+      - image: python:3.9.1-alpine3.12
+    steps:
+          # Checkout code from git
+      - checkout
+            # Add ssh keys with fingerprint
+      - add_ssh_keys:
+          fingerprints:
+            - "cf:78:4c:aa:3d:97:61:8e:86:e7:e4:8b:09:6b:ed:1f"
+      - restore_cache:
+          keys: [backend-build]
+                # attach workspace
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install dependencies
+          command: |
+            apk update
+            apk add --update aws-cli ansible tar
+      - run:
+          name: package backend
+          command: |
+            tar -C /tmp/artifacts/backend -czvf artifact.tar.gz .
+      - run:
+          name: Deploy backend
+          command: |
+            cd .circleci/ansible
+            export ANSIBLE_HOST_KEY_CHECKING=False
+            cat inventory.tx
+            ansible-playbook -i inventory.txt deploy-backend.yml
+      - rollback-on-failure-migration
+      - destroy-environment
+      # Here's where you will add some code to rollback on failure  
+        
 workflows:
   default:
     jobs:
@@ -189,3 +297,12 @@ workflows:
       - configure-infrastructure:
           requires: 
             - deploy-infrastructure
+      - run-migrations:
+          requires: 
+            - configure-infrastructure
+      - deploy-frontend:
+          requires: 
+            - run-migrations
+      - deploy-backend:
+          requires:
+            - run-migrations
