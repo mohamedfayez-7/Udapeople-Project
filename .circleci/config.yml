@@ -16,7 +16,7 @@ commands:
             aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.Workflow_ID >>
             aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.Workflow_ID >>
 
-  rollback-on-failure-migration:
+  revert-migration:
     description: rollback to last migration
     parameters:
       Workflow_ID:
@@ -24,7 +24,7 @@ commands:
         default: ${CIRCLE_WORKFLOW_ID:0:7}
     steps:
       - run:
-          name: rollback-on-failure
+          name: revert-migration
           when: on_fail
           command: |
             SUCCESS=$(curl --insecure  https://kvdb.io/qMCu5x6y6RvS7ER4LGsr7/migration_<< parameters.Workflow_ID >>)
@@ -206,7 +206,7 @@ jobs:
             then
               curl https://kvdb.io/qMCu5x6y6RvS7ER4LGsr7/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
-      - rollback-on-failure-migration
+      - revert-migration
       - destroy-environment
      # Here's where you will add some code to rollback on failure      
 
@@ -240,7 +240,7 @@ jobs:
             npm run build
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
-      - rollback-on-failure-migration
+      - revert-migration
       - destroy-environment
       # Here's where you will add some code to rollback on failure      
                     
@@ -267,7 +267,7 @@ jobs:
       - run:
           name: package backend
           command: |
-            tar -C ~/backend -czvf artifact.tar.gz .
+            tar -C ~/ -czvf artifact.tar.gz .
       - run:
           name: Deploy backend
           command: |
@@ -275,9 +275,37 @@ jobs:
             export ANSIBLE_HOST_KEY_CHECKING=False
             cat inventory.tx
             ansible-playbook -i inventory.txt deploy-backend.yml
-      - rollback-on-failure-migration
+      - revert-migration
       - destroy-environment
+      # Here's where you will add some code to rollback on failure 
+
+  smoke-test:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      # Checkout code from git
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt update
+            sudo apt install -y awscli
+            sudo apt install -y python3 
+            sudo apt install -y ansible
+      - run:
+          name: Get backend url
+          command: |
+            # your code here
+      - run:
+          name: Backend smoke test.
+          command: |
+            # your code here
+      - run:
+          name: Frontend smoke test.
+          command: |
+            # your code here
       # Here's where you will add some code to rollback on failure  
+
         
 workflows:
   default:
