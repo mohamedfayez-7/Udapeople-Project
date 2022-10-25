@@ -263,7 +263,7 @@ jobs:
           name: Install dependencies
           command: |
             apk update
-            apk add --update aws-cli ansible tar
+            apk add --update aws-cli ansible tar npm nodejs gzip
       - run:
           name: Deploy backend
           command: |
