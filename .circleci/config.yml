@@ -291,7 +291,7 @@ jobs:
           name: Install dependencies
           command: |
             apk update
-            apk add --update aws-cli curl npm nodejs 
+            apk add --update aws-cli ansible curl npm nodejs 
       - run:
           name: Backend smoke test.
           command: |
