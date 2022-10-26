@@ -358,11 +358,6 @@ jobs:
             unzip awscliv2.zip
             sudo ./aws/install
       - run:
-          name: Install Node.js 13
-          command: |
-            curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
-            sudo apt install -y nodej
-      - run:
           name: Remove old stacks
           command: |
             export STACKS=($(aws cloudformation list-stacks \
@@ -395,28 +390,28 @@ workflows:
       - scan-frontend:
           requires:
             - build-frontend
-      - deploy-infrastructure:
-          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-          filters:
-            branches:
-              only: [master]
-      - configure-infrastructure:
-          requires: 
-            - deploy-infrastructure
-      - run-migrations:
-          requires: 
-            - configure-infrastructure
-      - deploy-frontend:
-          requires: 
-            - run-migrations
-      - deploy-backend:
-          requires:
-            - run-migrations
-      - smoke-test:
-          requires: [deploy-backend, deploy-frontend]
-      - cloudfront-update:
-          requires: 
-            - smoke-test
-      - cleanup:
-          requires:
-            - cloudfront-update
+#      - deploy-infrastructure:
+#          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+#          filters:
+#            branches:
+#              only: [master]
+#      - configure-infrastructure:
+#          requires: 
+#            - deploy-infrastructure
+#      - run-migrations:
+#          requires: 
+#            - configure-infrastructure
+#      - deploy-frontend:
+#          requires: 
+#            - run-migrations
+#      - deploy-backend:
+#          requires:
+#            - run-migrations
+#      - smoke-test:
+#          requires: [deploy-backend, deploy-frontend]
+#      - cloudfront-update:
+#          requires: 
+#            - smoke-test
+#      - cleanup:
+#          requires:
+#            - cloudfront-update
