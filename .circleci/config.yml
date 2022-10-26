@@ -306,13 +306,7 @@ jobs:
             URL=$(cat url.txt)
             export API_URL="http://${URL}:3030"
             echo "${API_URL}"
-            if curl -s $API_URL/api/status | grep "ok"
-            then
-                return 0
-            else
-                return 1
-            fi
-
+            curl $API_URL
       - run:
           name: Frontend smoke test.
           command: |
