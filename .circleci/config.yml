@@ -283,27 +283,40 @@ jobs:
 
   smoke-test:
     docker:
-      - image: cimg/base:stable
+        - image: amazon/aws-cli
     steps:
       - checkout
       - run:
-          name: Install AWS CLI v2
+          name: Install dependencies
           command: |
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            sudo ./aws/install
+              apk add --update aws-cli npm nodejs
       - run:
-          name: Install Node.js 13
+          name: Get backend url
           command: |
-            curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
-            sudo apt install -y nodejs
+            BACKEND_PUBLIC_IP_ADDRESS=$(aws ec2 describe-instances \
+              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --output text)
+            echo "${BACKEND_PUBLIC_IP_ADDRESS}
+      - run:
+          name: Backend smoke test
+          command: |
+            export API_URL="http://${BACKEND_PUBLIC_IP_ADDRESS}:3030"
+            echo "${API_URL}"
+            if curl "${API_URL}/api/status" | grep "ok"
+            then
+                return 0
+            else
+                return 1
+            fi
+
       - run:
           name: Frontend smoke test.
           command: |
             URL=http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website.${AWS_DEFAULT_REGION}.amazonaws.com
             if curl -s $URL | grep "Welcome"
             then
-              exit 1
+              exit 0
             else
               exit 1
             fi
