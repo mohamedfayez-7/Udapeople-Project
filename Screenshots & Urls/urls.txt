@@ -1,1 +1,9 @@
 https://github.com/mohamedfayez-7/Udapeople-Project		[URL01]
+
+http://udapeople-5cff9bc.s3-website-us-east-1.amazonaws.com     [URL02]
+
+dg27sns6dx58w.cloudfront.net                                    [URL03]
+
+ec2-3-84-42-71.compute-1.amazonaws.com:3030		        [URL04]
+
+ec2-3-83-64-195.compute-1.amazonaws.com:9090		        [URL05]

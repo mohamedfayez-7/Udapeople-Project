@@ -306,7 +306,7 @@ jobs:
             BE_IP_URL=$(cat backend-ip.txt)
             API_URL=$BE_IP_URL
             echo "${API_URL}"
-#            curl -s $API_URL/api/status
+            curl -s $API_URL/api/status
       - run:
           name: Frontend smoke test.
           command: |
