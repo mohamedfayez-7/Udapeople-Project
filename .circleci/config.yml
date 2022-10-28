@@ -1,5 +1,6 @@
 version: 2.1
-
+orbs:   
+  slack: circleci/slack@4.10.1
 commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks.
@@ -12,9 +13,10 @@ commands:
           name: Destroy environments
           when: on_fail
           command: |
-            aws s3 rm s3://udapeople-<<parameters.Workflow_ID>> --recursive
-            aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.Workflow_ID >>
-            aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.Workflow_ID >>
+            aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
+            aws s3 rm "s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}" --recursive
+            aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
+
 
   revert-migration:
     description: rollback to last migration
@@ -75,6 +77,8 @@ jobs:
       - image: cimg/node:13.8.0
     steps:
       - checkout
+      - restore_cache:
+          keys: [frontend-build]
       - run:
           name: test frontend
           command: |
@@ -87,6 +91,8 @@ jobs:
       - image: cimg/node:13.8.0
     steps:
       - checkout
+      - restore_cache:
+          keys: [backend-build]
       - run:
           name: test backend
           command: |
@@ -377,28 +383,28 @@ workflows:
       - scan-frontend:
           requires:
             - build-frontend
-      - deploy-infrastructure:
-          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-          filters:
-            branches:
-              only: [master]
-      - configure-infrastructure:
-          requires: 
-            - deploy-infrastructure
-      - run-migrations:
-          requires: 
-            - configure-infrastructure
-      - deploy-frontend:
-          requires: 
-            - run-migrations
-      - deploy-backend:
-          requires:
-            - run-migrations
-      - smoke-test:
-          requires: [deploy-backend, deploy-frontend]
-      - cloudfront-update:
-          requires: 
-            - smoke-test
-      - cleanup:
-          requires:
-            - cloudfront-update
+      # - deploy-infrastructure:
+      #     requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      #     filters:
+      #       branches:
+      #         only: [master]
+      # - configure-infrastructure:
+      #     requires: 
+      #       - deploy-infrastructure
+      # - run-migrations:
+      #     requires: 
+      #       - configure-infrastructure
+      # - deploy-frontend:
+      #     requires: 
+      #       - run-migrations
+      # - deploy-backend:
+      #     requires:
+      #       - run-migrations
+      # - smoke-test:
+      #     requires: [deploy-backend, deploy-frontend]
+      # - cloudfront-update:
+      #     requires: 
+      #       - smoke-test
+      # - cleanup:
+      #     requires:
+      #       - cloudfront-update
