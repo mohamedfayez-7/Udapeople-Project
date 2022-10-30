@@ -323,42 +323,44 @@ jobs:
 
   smoke-test:
     docker:
-        - image: amazon/aws-cli
+      - image: cimg/base:stable
     steps:
       - checkout
-      - run:
-          name: Install dependencies
-          command: |
-            yum install -y curl tar sudo
-            curl -sL https://rpm.nodesource.com/setup_13.x | sudo bash -
-            yum install -y nodejs
+      - install_awscli
+      - install_nodejs
       - run:
           name: Get backend url
           command: |
-            BACKEND_PUBLIC_IP_ADDRESS=$(aws ec2 describe-instances \
+            BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
               --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text)
-            echo "http://${BACKEND_PUBLIC_IP_ADDRESS}:3030"> backend-ip.txt
-      - run:
-          name: Backend smoke test
-          command: |
-            BE_IP_URL=$(cat backend-ip.txt)
-            API_URL=$BE_IP_URL
-            echo "${API_URL}"
-            curl -s $API_URL/api/status
+            export API_URL=http://${BACKEND_PUBLIC_IP}:3030
+            if curl -s $API_URL/api/status | grep "ok"
+            then
+              exit 0
+            else
+              exit 1
+            fi
       - run:
           name: Frontend smoke test.
           command: |
-            URL=http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website.${AWS_DEFAULT_REGION}.amazonaws.com
-            curl -s $URL
+            FRONTEND_WEBSITE=http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website.${AWS_DEFAULT_REGION}.amazonaws.com
+            if curl -s $FRONTEND_WEBSITE | grep "Welcome"
+            then
+              exit 0
+            else
+              exit 1
+            fi
       - destroy-environment
       - revert-migrations
       # Here's where you will add some code to rollback on failure  
 
   cloudfront-update:
     docker:
-        - image: amazon/aws-cli
+      - image: cimg/base:stable
+      - install_awscli
+      - install_nodejs
     steps:
       - checkout
       - run:
@@ -381,9 +383,11 @@ jobs:
 
   cleanup:
     docker:
-        - image: amazon/aws-cli
+      - image: cimg/base:stable
     steps:
       - checkout
+      - install_awscli
+      - install_nodejs
       - run:
           name: Remove old stacks
           command: |
@@ -434,11 +438,9 @@ workflows:
       - deploy-backend:
           requires:
             - run-migrations
-      # - smoke-test:
-      #     requires: [deploy-backend, deploy-frontend]
-      # - cloudfront-update:
-      #     requires: 
-      #       - smoke-test
+      - cloudfront-update:
+          requires: 
+            - smoke-test
       # - cleanup:
       #     requires:
       #       - cloudfront-update
