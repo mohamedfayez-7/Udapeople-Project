@@ -444,7 +444,7 @@ workflows:
             branches:
               only: [master]
           type: approval
-            require: [deploy-backend, deploy-frontend]
+          requires: [deploy-backend, deploy-frontend]
       - smoke-test:
           requires: 
             - hold
