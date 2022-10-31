@@ -310,9 +310,6 @@ jobs:
       - run:
           name: Deploy backend
           command: |
-            export TYPEORM_MIGRATIONS_DIR=./migrations
-            export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
-            export TYPEORM_MIGRATIONS=./migrations/*.ts
             cd .circleci/ansible
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml
@@ -444,6 +441,6 @@ workflows:
       - cloudfront-update:
           requires: 
             - smoke-test
-      # - cleanup:
-      #     requires:
-      #       - cloudfront-update
+      - cleanup:
+          requires:
+            - cloudfront-update
