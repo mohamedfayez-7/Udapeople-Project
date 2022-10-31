@@ -6,4 +6,3 @@ dg27sns6dx58w.cloudfront.net                                    [URL03]
 
 http://3.91.217.196:3030/api/status		                [URL04]
 
-ec2-3-83-64-195.compute-1.amazonaws.com:9090		        [URL05]
