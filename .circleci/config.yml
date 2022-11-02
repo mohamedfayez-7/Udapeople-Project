@@ -203,6 +203,8 @@ jobs:
     steps:
       - checkout
       - run: apk add --update tar gzip
+      - attach_workspace:
+          at: ~/
       - add_ssh_keys:
           fingerprints:
             - "cf:78:4c:aa:3d:97:61:8e:86:e7:e4:8b:09:6b:ed:1f"
@@ -210,13 +212,10 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update ansible
-      - attach_workspace:
-          at: ~/
       - run:
           name: Configure server
           command: |
-            cd .circleci/ansible
-            ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory.txt configure-server.yml
+            ansible-playbook .circleci/ansible/configure-server.yml -i .circleci/ansible/inventory.txt
       - destroy-environment
 
   run-migrations:
@@ -341,7 +340,7 @@ jobs:
 
             cd .circleci/ansible
             cat inventory.txt
-            ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory.txt deploy-backend.yml
+            ansible-playbook -i inventory.txt deploy-backend.yml
 
       - destroy-environment
       - revert-migrations
