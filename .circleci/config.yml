@@ -240,6 +240,7 @@ jobs:
     steps:
       - checkout
       - install_awscli
+      - create-dotenv-file
       - run:
           name: Run migrations
           command: |
