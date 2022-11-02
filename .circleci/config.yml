@@ -199,14 +199,17 @@ jobs:
 
   configure-infrastructure:
     docker:
-      - image: cimg/base:stable
+      - image: python:3.7-alpine3.11
     steps:
       - checkout
-      - install_awscli
-      - install_ansible
+      - run: apk add --update tar gzip
       - add_ssh_keys:
           fingerprints:
             - "cf:78:4c:aa:3d:97:61:8e:86:e7:e4:8b:09:6b:ed:1f"
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update ansible
       - attach_workspace:
           at: ~/
       - run:
@@ -277,14 +280,28 @@ jobs:
                     
   deploy-backend:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/python:3.10
     steps:
           # Checkout code from git
       - checkout
-      - install_awscli
-      - install_ansible
-      - install_nodejs
-            # Add ssh keys with fingerprint
+      - run: 
+          name: Install aws_cli
+          command: |
+            sudo apt-get update && sudo apt-get install -yy less
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install 
+      - run:
+          name: Install Ansible
+          command: |
+            python3 -m pip install --user ansible  
+      - run:
+          name: Install Node.js 13.8.0
+          command: |
+            curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+            sudo apt install -y nodejs
+            sudo npm install --global n
+            sudo n 13.8.0
       - run: sudo apt-get install tar gzip -y
       - add_ssh_keys:
           fingerprints:
