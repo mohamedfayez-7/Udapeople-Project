@@ -211,6 +211,14 @@ jobs:
       - run:
           name: Configure Server
           command: |
+            export ENVIRONMENT=production
+            export VERSION=1
+            export TYPEORM_HOST=${TYPEORM_HOST}
+            export TYPEORM_PORT=${TYPEORM_PORT}
+            export TYPEORM_USERNAME=${TYPEORM_USERNAME}
+            export TYPEORM_PASSWORD=${TYPEORM_PASSWORD}
+            export TYPEORM_DATABASE=${TYPEORM_DATABASE}
+            export TYPEORM_CONNECTION=postgres
             cd .circleci/ansible
             cat inventory.txt
             ansible-playbook -i inventory.txt configure-server.yml
@@ -302,7 +310,7 @@ jobs:
             sudo apt update
             sudo apt install curl
             curl --version
-            
+
       - run:
           name: Package Backend
           command: |
@@ -348,9 +356,11 @@ jobs:
               --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text)
-
+            sudo apt update
+            sudo apt install
+            curl --version
             export API_URL=http://${BACKEND_PUBLIC_IP}:3030
-            if curl -H ${API_URL}/api/status | grep "ok"
+            if curl -v ${API_URL}/api/status | grep "ok"
             then
               exit 0
             else
@@ -360,7 +370,7 @@ jobs:
           name: Frontend smoke test.
           command: |
             FRONTEND_WEBSITE=http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website.${AWS_DEFAULT_REGION}.amazonaws.com
-            if curl -s $FRONTEND_WEBSITE | grep "Welcome"
+            if curl -v $FRONTEND_WEBSITE | grep "Welcome"
             then
               exit 0
             else
