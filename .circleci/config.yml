@@ -16,7 +16,6 @@ commands:
             aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
             aws s3 rm "s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}" --recursive
 
-
   revert-migrations:
     description: rollback to last migration
     parameters:
@@ -300,6 +299,10 @@ jobs:
           command: |
             cd backend
             npm install
+            sudo apt update
+            sudo apt install curl
+            curl --version
+            
       - run:
           name: Package Backend
           command: |
@@ -347,7 +350,7 @@ jobs:
               --output text)
 
             export API_URL=http://${BACKEND_PUBLIC_IP}:3030
-            if curl ${API_URL}/api/status | grep "ok"
+            if curl -H ${API_URL}/api/status | grep "ok"
             then
               exit 0
             else
