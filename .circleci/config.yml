@@ -197,27 +197,26 @@ jobs:
           - project/.circleci/ansible/inventory.txt
       - destroy-environment
 
-  configure-infrastructure:
+ configure-infrastructure:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: cimg/base:stable
     steps:
       - checkout
-      - run: apk add --update tar gzip
+      - install_awscli
+      - install_ansible
+      - add_ssh_keys:
+          fingerprints: 
+            - "cf:78:4c:aa:3d:97:61:8e:86:e7:e4:8b:09:6b:ed:1f"
       - attach_workspace:
           at: ~/
-      - add_ssh_keys:
-          fingerprints:
-            - "cf:78:4c:aa:3d:97:61:8e:86:e7:e4:8b:09:6b:ed:1f"
       - run:
-          name: Install dependencies
+          name: Configure Server
           command: |
-            pip install setuptools==5.7
-            apk add --update ansible
-      - run:
-          name: Configure server
-          command: |
-            ansible-playbook .circleci/ansible/configure-server.yml -i .circleci/ansible/inventory.txt
+            cd .circleci/ansible
+            cat inventory.txt
+            ansible-playbook -i inventory.txt configure-server.yml
       - destroy-environment
+
 
   run-migrations:
     docker:
@@ -280,28 +279,13 @@ jobs:
                     
   deploy-backend:
     docker:
-      - image: cimg/python:3.10
+      - image: cimg/base:stable
     steps:
           # Checkout code from git
       - checkout
-      - run: 
-          name: Install aws_cli
-          command: |
-            sudo apt-get update && sudo apt-get install -yy less
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            sudo ./aws/install 
-      - run:
-          name: Install Ansible
-          command: |
-            python3 -m pip install --user ansible  
-      - run:
-          name: Install Node.js 13.8.0
-          command: |
-            curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-            sudo apt install -y nodejs
-            sudo npm install --global n
-            sudo n 13.8.0
+      - install_awscli
+      - install_ansible
+      - install_nodejs
       - run: sudo apt-get install tar gzip -y
       - add_ssh_keys:
           fingerprints:
