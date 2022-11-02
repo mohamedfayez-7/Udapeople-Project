@@ -1,6 +1,22 @@
 version: 2.1
 
 commands:
+  create-dotenv-file:
+    description: Create .env file
+    steps:
+      - run:
+          name: Add env vars to .env file
+          command: |
+            echo ENVIRONMENT=$ENVIRONMENT > "./backend/.env"
+            echo TYPEORM_CONNECTION=$TYPEORM_CONNECTION >> "./backend/.env"
+            echo TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> "./backend/.env"
+            echo TYPEORM_ENTITIES=$TYPEORM_ENTITIES >> "./backend/.env"
+            echo TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS >> "./backend/.env"
+            echo TYPEORM_HOST=$TYPEORM_HOST >> "./backend/.env"
+            echo TYPEORM_PORT=$TYPEORM_PORT >> "./backend/.env"
+            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "./backend/.env"
+            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "./backend/.env"
+            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "./backend/.env"
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks.
     parameters:
@@ -208,17 +224,10 @@ jobs:
             - "cf:78:4c:aa:3d:97:61:8e:86:e7:e4:8b:09:6b:ed:1f"
       - attach_workspace:
           at: ~/
+      - create-dotenv-file
       - run:
           name: Configure Server
           command: |
-            export ENVIRONMENT=production
-            export VERSION=1
-            export TYPEORM_HOST=${TYPEORM_HOST}
-            export TYPEORM_PORT=${TYPEORM_PORT}
-            export TYPEORM_USERNAME=${TYPEORM_USERNAME}
-            export TYPEORM_PASSWORD=${TYPEORM_PASSWORD}
-            export TYPEORM_DATABASE=${TYPEORM_DATABASE}
-            export TYPEORM_CONNECTION=postgres
             cd .circleci/ansible
             cat inventory.txt
             ansible-playbook -i inventory.txt configure-server.yml
@@ -302,6 +311,7 @@ jobs:
                 # attach workspace
       - attach_workspace:
           at: ~/
+      - create-dotenv-file
       - run:
           name: Install dependencies
           command: |
@@ -322,14 +332,6 @@ jobs:
       - run:
           name: Deploy backend
           command: |
-            export ENVIRONMENT=production
-            export VERSION=1
-            export TYPEORM_HOST=${TYPEORM_HOST}
-            export TYPEORM_PORT=${TYPEORM_PORT}
-            export TYPEORM_USERNAME=${TYPEORM_USERNAME}
-            export TYPEORM_PASSWORD=${TYPEORM_PASSWORD}
-            export TYPEORM_DATABASE=${TYPEORM_DATABASE}
-            export TYPEORM_CONNECTION=postgres
             export TYPEORM_MIGRATIONS_DIR=./backend-app/dist/migrations
             export TYPEORM_ENTITIES=./backend-app/dist/modules/domain/**/*.entity{.ts,.js}
             export TYPEORM_MIGRATIONS=./backend-app/dist/migrations/*.ts
@@ -349,6 +351,7 @@ jobs:
       - checkout
       - install_awscli
       - install_nodejs
+      - create-dotenv-file
       - run:
           name: Get backend url
           command: |
