@@ -216,7 +216,7 @@ jobs:
           name: Configure server
           command: |
             cd .circleci/ansible
-             ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory.txt configure-server.yml
+            ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory.txt configure-server.yml
       - destroy-environment
 
   run-migrations:
