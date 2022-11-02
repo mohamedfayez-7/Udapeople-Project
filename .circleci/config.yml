@@ -52,10 +52,10 @@ commands:
       - run:
           name: Install Ansible
           command: |
-            sudo apt-get update
+            sudo apt update
             sudo apt install software-properties-common -y
             sudo add-apt-repository --yes --update ppa:ansible/ansible
-            sudo apt install ansible -y --fix-missing
+            sudo apt install ansible -y
             
   install_nodejs:
     description: Install Node.js 13
@@ -202,6 +202,7 @@ jobs:
       - image: cimg/base:stable
     steps:
       - checkout
+      - install_awscli
       - install_ansible
       - add_ssh_keys:
           fingerprints:
@@ -316,7 +317,7 @@ jobs:
             export TYPEORM_USERNAME=${TYPEORM_USERNAME}
             export TYPEORM_PASSWORD=${TYPEORM_PASSWORD}
             export TYPEORM_DATABASE=${TYPEORM_DATABASE}
-            export TYPEORM_CONNECTION=${TYPEORM_CONNECTION}
+            export TYPEORM_CONNECTION=postgres
             export TYPEORM_MIGRATIONS_DIR=./backend-app/dist/migrations
             export TYPEORM_ENTITIES=./backend-app/dist/modules/domain/**/*.entity{.ts,.js}
             export TYPEORM_MIGRATIONS=./backend-app/dist/migrations/*.ts
