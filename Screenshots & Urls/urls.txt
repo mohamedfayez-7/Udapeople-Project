@@ -1,8 +1,8 @@
-https://github.com/mohamedfayez-7/Udapeople-Project		[URL01]
+https://github.com/mohamedfayez-7/Udapeople-Project			    [URL01]
 
-http://udapeople-24a33de.s3-website-us-east-1.amazonaws.com     [URL02]
+http://udapeople-22f80fa.s3-website-us-east-1.amazonaws.com/#/employees     [URL02]
 
-dg27sns6dx58w.cloudfront.net                                    [URL03]
+http://d8anic7ei803l.cloudfront.net/#/employees                      	    [URL03]				
 
-http://3.91.217.196:3030/api/status		                [URL04]
+http://54.161.204.152:3030/api/status		                	    [URL04]
 
