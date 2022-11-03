@@ -95,7 +95,6 @@ jobs:
           command: |
             cd backend
             npm install
-            npm install minimist
             npm run build
       - save_cache:
           paths: [backend/node_modules]
@@ -157,11 +156,12 @@ jobs:
           command: |
             cd backend
             npm install
+            npm install minimist
             npm audit fix --audit-level=critical --force
             npm audit fix --audit-level=critical --force
             npm audit fix --audit-level=critical --force
             npm audit fix --audit-level=critical --force
-            npm audit --audit-level=critical
+            # npm audit --audit-level=critical
 
   deploy-infrastructure:
     docker:
