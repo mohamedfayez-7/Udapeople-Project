@@ -77,8 +77,6 @@ jobs:
           name: build frontend
           command: |
             cd frontend
-            npm i -g npm-check-updates
-            ncu -u
             npm install
             npm run build
       - save_cache:
@@ -96,9 +94,8 @@ jobs:
           name: build backend
           command: |
             cd backend
-            npm i -g npm-check-updates
-            ncu -u
             npm install
+            npm install minimist
             npm run build
       - save_cache:
           paths: [backend/node_modules]
