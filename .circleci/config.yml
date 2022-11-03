@@ -232,7 +232,9 @@ jobs:
           command: |
             cd backend
             sudo npm install
-            sudo npm run migrations > migrations_dump.txt
+            sudo npm install typescript@3.8.3 -g
+            sudo tsc --init 
+            npm run migrations > migrations_dump.txt
       - run:
           name: Send migration status to kvdb.io
           command: |
@@ -450,6 +452,6 @@ workflows:
       - cloudfront-update:
           requires: 
             - smoke-test
-      - cleanup:
-          requires:
-            - cloudfront-update
+      # - cleanup:
+      #     requires:
+      #       - cloudfront-update
