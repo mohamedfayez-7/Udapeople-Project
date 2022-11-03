@@ -8,6 +8,7 @@ commands:
           name: Add env vars to .env file
           command: |
             echo ENVIRONMENT=$ENVIRONMENT > "./backend/.env"
+            echo NODE_ENV=production >> "./backend/.env"
             echo TYPEORM_CONNECTION=$TYPEORM_CONNECTION >> "./backend/.env"
             echo TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> "./backend/.env"
             echo TYPEORM_ENTITIES=$TYPEORM_ENTITIES >> "./backend/.env"
@@ -360,10 +361,8 @@ jobs:
               --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text)
-            sudo apt update
-            sudo apt install
-            curl --version
             export API_URL=http://${BACKEND_PUBLIC_IP}:3030
+            echo API_URL
             if curl -v ${API_URL}/api/status | grep "ok"
             then
               exit 0
