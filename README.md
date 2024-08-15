@@ -14,7 +14,7 @@ In this project, you will prove your mastery of the following learning objective
 - Surface critical server errors for diagnosis using centralized structured logging.
 
 ![Diagram of CI/CD Pipeline we will be building.](udapeople.png)
-![Udagram Infrastructure](https://github.com/your-username/your-repo-name/blob/main/Udagram%20Infrastructure%20.png)
+![Udagram Infrastructure](https://github.com/mohamedfayez-7/Udapeople-Project/blob/232656f7b7730cf638911e06673734cd425cb74d/udapeople-pipeline.png)
 ### Instructions
 
 * [Selling CI/CD](instructions/0-selling-cicd.md)
