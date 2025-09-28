@@ -16,7 +16,7 @@ In this project, you will prove your mastery of the following learning objective
 ![Diagram of CI/CD Pipeline we will be building.](udapeople.png)
 
 ![UdaPeople Infrastructure](https://github.com/mohamedfayez-7/Udapeople-Project/blob/77e1e8d51028772444d27f5d126dcea63382095d/Udagram%20Infrastructure%20.png)
-![Udagram CICD](https://github.com/mohamedfayez-7/Udapeople-Project/blob/a6acd36ad6c94663be827df25b98a3acb2e06939/digram.png)
+# ![Udagram CICD](https://github.com/mohamedfayez-7/Udapeople-Project/blob/a6acd36ad6c94663be827df25b98a3acb2e06939/digram.png)
 ![Udagram Infrastructure](https://github.com/mohamedfayez-7/Udapeople-Project/blob/232656f7b7730cf638911e06673734cd425cb74d/udapeople-pipeline.png)
 ### Instructions
 
